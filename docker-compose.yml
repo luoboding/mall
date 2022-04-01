@@ -1,0 +1,33 @@
+version: "2.0"
+
+networks:
+  default:
+    external:
+      name: mall-net
+
+services:
+  db:
+    restart: always
+    image: mysql:5.7
+    platform: linux/x86_64
+    container_name: mall_db
+    volumes:
+      - ./mydir:/mydir
+      - ./.datadir:/var/lib/mysql
+      - ./conf/my.cnf:/etc/my.cnf
+    environment:
+      - "MYSQL_ROOT_PASSWORD=mall"
+      - "MYSQL_DATABASE=mall"
+      - "TZ=Asia/Shanghai"
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: "adminer:latest"
+    container_name: mall_db_console
+    links:
+      - db:db.mall.luoboding
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
