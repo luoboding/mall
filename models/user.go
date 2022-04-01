@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/luoboding/mall/db"
 )
 
@@ -36,22 +37,33 @@ func (user *User) Encrypt_password() {
 	user.Password = encrypt(user.Password)
 }
 
-func (user User) Check() error {
+func (user *User) Check() error {
 	if user.Username == "" || user.Password == "" {
 		return errors.New("参数错误")
 	}
 	return nil
 }
 
-func (user User) Save() error {
+func (user *User) Create() error {
 	db := db.Get_DB()
 	result := db.Create(&user)
 	return result.Error
 }
 
-func (user User) IsExist() bool {
+func (user *User) IsExist() bool {
 	var count int64
 	db := db.Get_DB()
 	db.Table("users").Where("username = ?", user.Username).Count(&count)
 	return count > 0
+}
+
+func (user *User) Create_JWT() (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Issuer:    "test",
+		Subject:   fmt.Sprintf("%d", user.ID),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(3600 * 24)),
+		NotBefore: jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	})
+	return token.SignedString([]byte("mall"))
 }

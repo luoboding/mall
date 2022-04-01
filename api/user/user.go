@@ -23,7 +23,7 @@ func Signup(context *gin.Context) {
 		return
 	}
 	user.Encrypt_password()
-	e := user.Save()
+	e := user.Create()
 	if e != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": e.Error(),
