@@ -7,12 +7,9 @@ import (
 
 type Catalogue struct {
 	ID        uint `gorm:"primaryKey"`
-	Nickname  sql.NullString
-	Username  string `gorm:"index"`
-	Password  string
-	Phone     string `gorm:"index"`
-	Gender    uint8
-	Avatar    sql.NullString
-	Status    uint `gorm:"index"`
+	Title     string
+	Thumbnail sql.NullString // 分类图标 参考美团外卖
+	Sort      uint8          // 顺序
+	Status    uint           `gorm:"index"` // 状态 0 开启 1 禁用
 	CreatedAt time.Time
 }
