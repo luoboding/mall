@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/luoboding/mall/db"
+	token "github.com/luoboding/mall/models/token"
 )
 
 const (
@@ -58,12 +58,5 @@ func (user *User) IsExist() bool {
 }
 
 func (user *User) Create_JWT() (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Issuer:    "test",
-		Subject:   fmt.Sprintf("%d", user.ID),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(3600 * 24)),
-		NotBefore: jwt.NewNumericDate(time.Now()),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
-	})
-	return token.SignedString([]byte("mall"))
+	return token.New(uint64(user.ID), "user")
 }

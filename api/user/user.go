@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	models "github.com/luoboding/mall/models"
+	user "github.com/luoboding/mall/models/user"
 )
 
 func Signup(context *gin.Context) {
-	var user models.User
+	var user user.User
 	err := context.ShouldBindJSON(&user)
 	if err != nil || user.Check() != nil {
 		context.JSON(http.StatusBadRequest, gin.H{

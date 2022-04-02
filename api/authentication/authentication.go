@@ -5,13 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/luoboding/mall/db"
-	models "github.com/luoboding/mall/models"
+	models "github.com/luoboding/mall/models/user"
 )
 
 func Signin(context *gin.Context) {
 	var user models.User
 	err := context.ShouldBindJSON(&user)
-	if err != nil {
+	if err != nil || user.Check() != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": "参数错误",
 		})
