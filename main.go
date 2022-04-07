@@ -1,24 +1,39 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gin-gonic/gin"
-	authentication "github.com/luoboding/mall/api/authentication"
-	catalogue "github.com/luoboding/mall/api/catalogue"
-	user "github.com/luoboding/mall/api/user"
+	"github.com/luoboding/mall/api/authentication"
+	"github.com/luoboding/mall/api/catalogue"
+	"github.com/luoboding/mall/api/product"
+	"github.com/luoboding/mall/api/user"
 	"github.com/luoboding/mall/middleware/authorization"
+	"github.com/luoboding/mall/utils"
 )
 
 func main() {
 	r := gin.Default()
 
-	r.Use(authorization.Auth)
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 
 	r.POST("/user", user.Signup)
 	r.POST("/authentication", authentication.Signin)
+
+	product_group := r.Group("/product")
+	product_group.Use(authorization.Auth)
+	product_group.POST("", product.Create)
+	product_group.GET("", product.List)
+	product_group.GET("/:id", product.One)
+	product_group.PATCH("/:id", product.Update)
+
 	catalogue_group := r.Group("/catalogue")
-	{
-		catalogue_group.POST("", catalogue.Create)
-		catalogue_group.PATCH("/:id", catalogue.Update)
-	}
-	r.Run(":3000") // 监听并在 0.0.0.0:8080 上启动服务
+	catalogue_group.Use(authorization.Auth)
+	catalogue_group.POST("", catalogue.Create)
+	catalogue_group.PATCH("/:id", catalogue.Update)
+	// 获取环境变量
+	port := utils.If(os.Getenv("PORT") != "", os.Getenv("PORT"), "3000")
+	r.Run(fmt.Sprintf(":%s", port))
 }

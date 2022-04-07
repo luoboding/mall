@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/luoboding/mall/models/user"
 )
 
 const (
@@ -12,7 +13,7 @@ const (
 
 type UserAuthorization struct {
 	Id   uint64
-	Kind string
+	Kind user.UserKind
 }
 
 type UserClaims struct {
@@ -34,7 +35,7 @@ func (c *UserAuthorization) Create_JWT() (string, error) {
 }
 
 // 生成令牌
-func New(id uint64, kind string) (string, error) {
+func New(id uint64, kind user.UserKind) (string, error) {
 	user := UserAuthorization{
 		Id:   id,
 		Kind: kind,

@@ -11,21 +11,15 @@ import (
 func Create(c *gin.Context) {
 	var catalogue catalogue.Catalogue
 	err := c.ShouldBindJSON(&catalogue)
-	if err != nil || !catalogue.Validate() {
-		c.JSON(http.StatusBadRequest, gin.H{
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "参数错误",
-		})
-		return
-	}
-	if catalogue.Exist() {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "分类已经存在",
 		})
 		return
 	}
 	e := catalogue.Create()
 	if e != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": e.Error(),
 		})
 		return
@@ -41,14 +35,14 @@ func Update(c *gin.Context) {
 	var data catalogue.Catalogue
 	e := c.ShouldBindJSON(&data)
 	if e != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "参数错误",
 		})
 		return
 	}
 	i, e := strconv.Atoi(id)
 	if e != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "参数错误",
 		})
 		return
@@ -56,7 +50,7 @@ func Update(c *gin.Context) {
 	data.ID = uint(i)
 	update_error := data.Update()
 	if update_error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": e.Error(),
 		})
 		return

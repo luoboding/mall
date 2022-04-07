@@ -1,25 +1,21 @@
 package user
 
 import (
-	"crypto/sha256"
 	"database/sql"
-	"errors"
-	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/luoboding/mall/db"
-	token "github.com/luoboding/mall/models/token"
+	"github.com/luoboding/mall/utils"
+	"github.com/luoboding/mall/utils/errors"
 )
+
+type UserKind int
 
 const (
-	SALT = "mall"
+	UserKindNormal  UserKind = 1                   // 普通用户
+	UserKindManager UserKind = UserKindNormal << 1 // 管理员
 )
-
-func encrypt(input string) string {
-	sum := sha256.Sum256([]byte(input))
-	result := sha256.Sum256([]byte(fmt.Sprintf("%x", sum) + SALT))
-	return fmt.Sprintf("%x", result)
-}
 
 type User struct {
 	ID        uint `gorm:"primaryKey"`
@@ -34,29 +30,42 @@ type User struct {
 }
 
 func (user *User) Encrypt_password() {
-	user.Password = encrypt(user.Password)
+	user.Password = utils.Encrypt(user.Password)
 }
 
-func (user *User) Check() error {
+func (user *User) Validate() *errors.Error {
 	if user.Username == "" || user.Password == "" {
-		return errors.New("参数错误")
+		e := errors.New("参数错误")
+		e.Code = 400
+		return e
 	}
 	return nil
 }
 
-func (user *User) Create() error {
-	db := db.Get_DB()
-	result := db.Create(&user)
-	return result.Error
-}
-
-func (user *User) IsExist() bool {
+func (user *User) DoesSameUserNameExist() bool {
 	var count int64
 	db := db.Get_DB()
 	db.Table("users").Where("username = ?", user.Username).Count(&count)
 	return count > 0
 }
 
-func (user *User) Create_JWT() (string, error) {
-	return token.New(uint64(user.ID), "user")
+func (user *User) Create() *errors.Error {
+	db := db.Get_DB()
+	if err := user.Validate(); err != nil {
+		err.Code = 400
+		return err
+	}
+	if user.DoesSameUserNameExist() {
+		e := errors.New("用户已经存在")
+		e.Code = http.StatusConflict
+		return e
+	}
+	user.Encrypt_password()
+	result := db.Create(user)
+	if result.Error != nil {
+		e := errors.New(result.Error.Error())
+		e.Code = http.StatusBadRequest
+		return e
+	}
+	return nil
 }

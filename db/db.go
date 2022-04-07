@@ -2,7 +2,10 @@ package db
 
 import (
 	"fmt"
+	"os"
+	"sync"
 
+	"github.com/luoboding/mall/constants"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -15,9 +18,8 @@ type DBConnectConfig struct {
 	Port     string
 }
 
-func connect(conf DBConnectConfig) *gorm.DB {
-	// dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.User, conf.Password, conf.Host, conf.Port, conf.Db)
+func (c *DBConnectConfig) connect() *gorm.DB {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.User, c.Password, c.Host, c.Port, c.Db)
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       dsn,   // data source name
 		DefaultStringSize:         256,   // default size for string fields
@@ -32,14 +34,24 @@ func connect(conf DBConnectConfig) *gorm.DB {
 	return db
 }
 
+var instance *gorm.DB
+var once sync.Once
+
 func Get_DB() *gorm.DB {
-	config := DBConnectConfig{
-		Host:     "127.0.0.1",
-		Port:     "3306",
-		Db:       "mall",
-		User:     "root",
-		Password: "mall",
-	}
-	db := connect(config)
-	return db
+	once.Do(func() {
+		config := DBConnectConfig{
+			Host:     constants.DB_HOST,
+			Port:     constants.DB_PORT,
+			Db:       constants.DB_NAME,
+			User:     constants.DB_USER,
+			Password: constants.DB_PASSWORD,
+		}
+		instance = config.connect()
+		// 开启调试模式
+		DEBUG := os.Getenv("DEBUG")
+		if DEBUG != "" {
+			instance = instance.Debug()
+		}
+	})
+	return instance
 }

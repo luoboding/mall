@@ -1,6 +1,7 @@
 package catalogue
 
 import (
+	"errors"
 	"time"
 
 	"github.com/luoboding/mall/db"
@@ -15,11 +16,11 @@ type Catalogue struct {
 	CreatedAt time.Time
 }
 
-func (c *Catalogue) Validate() bool {
+func (c *Catalogue) validate() bool {
 	return c.Title != "" && c.Thumbnail != ""
 }
 
-func (c *Catalogue) Exist() bool {
+func (c *Catalogue) doseNameExist() bool {
 	connection := db.Get_DB()
 	var count int64
 	connection.Table("catalogues").Where("title = ?", c.Title).Count(&count)
@@ -27,6 +28,12 @@ func (c *Catalogue) Exist() bool {
 }
 
 func (c *Catalogue) Create() error {
+	if c.validate() {
+		return errors.New("参数错误")
+	}
+	if c.doseNameExist() {
+		return errors.New("分类已存在")
+	}
 	connection := db.Get_DB()
 	result := connection.Create(c)
 	return result.Error
@@ -41,4 +48,12 @@ func (c *Catalogue) Update() error {
 	}
 	action := connection.Model(instance).Updates(c)
 	return action.Error
+}
+
+// 包方法
+func One(id int) (*Catalogue, error) {
+	var one *Catalogue
+	connection := db.Get_DB()
+	r := connection.First(one, id)
+	return one, r.Error
 }
