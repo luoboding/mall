@@ -52,8 +52,8 @@ func (c *Catalogue) Update() error {
 
 // 包方法
 func One(id int) (*Catalogue, error) {
-	var one *Catalogue
+	var one Catalogue
 	connection := db.Get_DB()
-	r := connection.First(one, id)
-	return one, r.Error
+	r := connection.First(&one, id)
+	return &one, r.Error
 }

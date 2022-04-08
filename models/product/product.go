@@ -8,21 +8,22 @@ import (
 
 	"github.com/luoboding/mall/db"
 	"github.com/luoboding/mall/models/catalogue"
+	"github.com/luoboding/mall/sql/string_array"
 )
 
 type Product struct {
-	Id           uint64   `gorm:"primaryKey"`
-	Title        string   // 产品标题
-	Sub_title    string   // 产品简介
-	Thumbnail    string   // 标题缩略图
-	Pictures     []string // 产品图片
-	Catalogue_id int      // 分类id
-	Description  string   // 产品详细描述
-	Sort         uint8    // 顺序
-	Status       uint     `gorm:"index"` // 状态 0 开启 1 下架 2 售罄
+	Id           uint64                   `gorm:"primaryKey"`
+	Title        string                   // 产品标题
+	Sub_title    string                   // 产品简介
+	Thumbnail    string                   // 标题缩略图
+	Pictures     string_array.StringArray `gorm:"type:text[]"` // 产品图片
+	Catalogue_id int                      // 分类id
+	Description  string                   // 产品详细描述
+	Sort         uint8                    // 顺序
+	Status       uint                     `gorm:"index"` // 状态 0 开启 1 下架 2 售罄
 	CreatedAt    time.Time
 	// forign key
-	Catalogue catalogue.Catalogue
+	Catalogue catalogue.Catalogue `gorm:"foreignKey:catalogue_id"`
 }
 
 func (p *Product) validate() bool {
