@@ -8,33 +8,33 @@ import (
 
 	"github.com/luoboding/mall/db"
 	"github.com/luoboding/mall/models/catalogue"
-	"github.com/luoboding/mall/sql/string_array"
+	"gorm.io/datatypes"
 )
 
 type Product struct {
-	Id           uint64                   `gorm:"primaryKey"`
-	Title        string                   // 产品标题
-	Sub_title    string                   // 产品简介
-	Thumbnail    string                   // 标题缩略图
-	Pictures     string_array.StringArray `gorm:"type:text[]"` // 产品图片
-	Catalogue_id int                      // 分类id
-	Description  string                   // 产品详细描述
-	Sort         uint8                    // 顺序
-	Status       uint                     `gorm:"index"` // 状态 0 开启 1 下架 2 售罄
-	CreatedAt    time.Time
+	ID          uint64         `json:"id" gorm:"primaryKey"`
+	Title       string         `json:"title"`                     // 产品标题
+	SubTitle    string         `json:"sub_title"`                 // 产品简介
+	Thumbnail   string         `json:"thumbnail"`                 // 标题缩略图
+	Pictures    datatypes.JSON `json:"pictures" gorm:"type:JSON"` // 产品图片
+	CatalogueId int            `json:"catalogue_id"`              // 分类id
+	Description string         `json:"description"`               // 产品详细描述
+	Sort        uint8          `json:"sort"`                      // 顺序
+	Status      uint           `json:"status" gorm:"index"`       // 状态 0 开启 1 下架 2 售罄
+	CreatedAt   time.Time      `json:"created_at"`
 	// forign key
-	Catalogue catalogue.Catalogue `gorm:"foreignKey:catalogue_id"`
+	// catalogue catalogue.Catalogue `gorm:"foreignKey:CatalogueId"`
 }
 
 func (p *Product) validate() bool {
-	return p.Title != "" && p.Sub_title != "" && p.Thumbnail != "" && p.Catalogue_id != 0
+	return p.Title != "" && p.SubTitle != "" && p.Thumbnail != "" && p.CatalogueId != 0
 }
 
 func (p *Product) Create() error {
 	if !p.validate() {
 		return errors.New("参数错误")
 	}
-	cata, e := catalogue.One(p.Catalogue_id)
+	cata, e := catalogue.One(p.CatalogueId)
 	if e != nil || cata.ID == 0 {
 		return errors.New("分类不存在")
 	}
@@ -49,7 +49,7 @@ func (p *Product) Update() error {
 	}
 	var first Product
 	connection := db.Get_DB()
-	r := connection.Table("products").Where("id = ?", p.Id).First(&first)
+	r := connection.Table("products").Where("id = ?", p.ID).First(&first)
 	if r.Error != nil {
 		return r.Error
 	}
@@ -78,15 +78,15 @@ type ProductSearchQuery struct {
 }
 
 type ProductListResponse struct {
-	pagination Pagination
-	Result     []Product
+	Pagination Pagination `json:"pagination"`
+	Result     []Product  `json:"result"`
 }
 
 func List(query *ProductSearchQuery) (*ProductListResponse, error) {
 	response := &ProductListResponse{
-		pagination: query.Pagination,
-		Result:     []Product{},
+		Pagination: query.Pagination,
 	}
+	fmt.Println("pagination", query.Pagination.Current)
 	paramters := []interface{}{}
 	where := []string{}
 	if query.Title != "" {
@@ -113,6 +113,7 @@ func List(query *ProductSearchQuery) (*ProductListResponse, error) {
 	for _, v := range query.By {
 		q = q.Order(v)
 	}
-	r := q.Scan(&response.Result)
+	r := q.Find(&response.Result)
+	fmt.Println("r", response.Pagination, response.Result)
 	return response, r.Error
 }

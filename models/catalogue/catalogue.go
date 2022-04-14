@@ -8,12 +8,12 @@ import (
 )
 
 type Catalogue struct {
-	ID        uint   `gorm:"primaryKey"`
-	Title     string // 分类标题
-	Thumbnail string // 分类图标 参考美团外卖
-	Sort      uint8  // 顺序
-	Status    uint   `gorm:"index"` // 状态 0 开启 1 禁用
-	CreatedAt time.Time
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	Title     string    `json:"title"`               // 分类标题
+	Thumbnail string    `json:"thumbnail"`           // 分类图标 参考美团外卖
+	Sort      uint8     `json:"sort"`                // 顺序
+	Status    uint      `json:"status" gorm:"index"` // 状态 0 开启 1 禁用
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (c *Catalogue) validate() bool {

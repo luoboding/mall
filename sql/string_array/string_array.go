@@ -88,17 +88,17 @@ func appendArrayQuotedBytes(b, v []byte) []byte {
 func parseArray(src, del []byte) (dims []int, elems [][]byte, err error) {
 	var depth, i int
 
-	if len(src) < 1 || src[0] != '{' {
+	if len(src) < 1 || src[0] != '[' {
 		return nil, nil, fmt.Errorf("pq: unable to parse array; expected %q at offset %d", '{', 0)
 	}
 
 Open:
 	for i < len(src) {
 		switch src[i] {
-		case '{':
+		case '[':
 			depth++
 			i++
-		case '}':
+		case ']':
 			elems = make([][]byte, 0)
 			goto Close
 		default:
@@ -110,7 +110,7 @@ Open:
 Element:
 	for i < len(src) {
 		switch src[i] {
-		case '{':
+		case '[':
 			if depth == len(dims) {
 				break Element
 			}
@@ -119,8 +119,10 @@ Element:
 			i++
 		case '"':
 			var elem = []byte{}
+
 			var escape bool
 			for i++; i < len(src); i++ {
+
 				if escape {
 					elem = append(elem, src[i])
 					escape = false
@@ -139,8 +141,9 @@ Element:
 			}
 		default:
 			for start := i; i < len(src); i++ {
-				if bytes.HasPrefix(src[i:], del) || src[i] == '}' {
+				if bytes.HasPrefix(src[i:], del) || src[i] == ']' {
 					elem := src[start:i]
+					fmt.Println("sss", string(src[i]), string(elem))
 					if len(elem) == 0 {
 						return nil, nil, fmt.Errorf("pq: unable to parse array; unexpected %q at offset %d", src[i], i)
 					}
@@ -159,7 +162,7 @@ Element:
 			dims[depth-1]++
 			i += len(del)
 			goto Element
-		} else if src[i] == '}' && depth > 0 {
+		} else if src[i] == ']' && depth > 0 {
 			dims[depth-1]++
 			depth--
 			i++
@@ -170,7 +173,7 @@ Element:
 
 Close:
 	for i < len(src) {
-		if src[i] == '}' && depth > 0 {
+		if src[i] == ']' && depth > 0 {
 			depth--
 			i++
 		} else {

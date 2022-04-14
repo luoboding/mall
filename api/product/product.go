@@ -1,7 +1,6 @@
 package product
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -43,7 +42,7 @@ func List(c *gin.Context) {
 		By: order_by,
 	}
 
-	query := &product.ProductSearchQuery{
+	query := product.ProductSearchQuery{
 		Order:      order,
 		Pagination: pagination,
 	}
@@ -90,7 +89,7 @@ func List(c *gin.Context) {
 		query.Title = title
 	}
 
-	response, e := product.List(query)
+	response, e := product.List(&query)
 	if e != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": e.Error(),
@@ -103,7 +102,6 @@ func List(c *gin.Context) {
 func Create(c *gin.Context) {
 	var request product.Product
 	if e := c.ShouldBindJSON(&request); e != nil {
-		fmt.Println("request is ", request)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "参数错误",
 		})

@@ -13,6 +13,6 @@ func New(message string) *Error {
 }
 
 // 实现error协议
-func (e *Error) Error() string {
+func (e Error) Error() string {
 	return e.message
 }

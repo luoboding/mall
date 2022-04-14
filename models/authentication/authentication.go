@@ -36,5 +36,8 @@ func (a *Authentication) Signin() (string, error) {
 	if r.Error != nil {
 		return "", r.Error
 	}
+	if a.ID == 0 {
+		return "", errors.New("密码错误")
+	}
 	return a.Create_JWT()
 }

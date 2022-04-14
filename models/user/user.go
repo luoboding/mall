@@ -18,15 +18,15 @@ const (
 )
 
 type User struct {
-	ID        uint `gorm:"primaryKey"`
-	Nickname  sql.NullString
-	Username  string `gorm:"index"`
-	Password  string
-	Phone     string `gorm:"index"`
-	Gender    uint8
-	Avatar    sql.NullString
-	Status    uint `gorm:"index"`
-	CreatedAt time.Time
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Nickname  sql.NullString `json:"nickname"`
+	Username  string         `json:"username" gorm:"index"`
+	Password  string         `json:"password" gorm:"index"`
+	Phone     string         `json:"phone" gorm:"index"`
+	Gender    uint8          `json:"gender"`
+	Avatar    sql.NullString `json:"avatar"`
+	Status    uint           `json:"status" gorm:"index"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 func (user *User) Encrypt_password() {
@@ -49,7 +49,7 @@ func (user *User) DoesSameUserNameExist() bool {
 	return count > 0
 }
 
-func (user *User) Create() *errors.Error {
+func (user *User) Create() error {
 	db := db.Get_DB()
 	if err := user.Validate(); err != nil {
 		err.Code = 400
