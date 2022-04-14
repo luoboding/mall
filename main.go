@@ -10,10 +10,18 @@ import (
 	"github.com/luoboding/mall/api/product"
 	"github.com/luoboding/mall/api/user"
 	"github.com/luoboding/mall/middleware/authorization"
+	"github.com/luoboding/mall/sql/migrations"
 	"github.com/luoboding/mall/utils"
 )
 
+type Test struct {
+	Name string `example:"title"`
+}
+
 func main() {
+	// 运行migration
+	migrations.Migrate()
+
 	r := gin.Default()
 
 	r.Use(gin.Logger())

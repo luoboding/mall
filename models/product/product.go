@@ -86,7 +86,6 @@ func List(query *ProductSearchQuery) (*ProductListResponse, error) {
 	response := &ProductListResponse{
 		Pagination: query.Pagination,
 	}
-	fmt.Println("pagination", query.Pagination.Current)
 	paramters := []interface{}{}
 	where := []string{}
 	if query.Title != "" {
@@ -114,6 +113,5 @@ func List(query *ProductSearchQuery) (*ProductListResponse, error) {
 		q = q.Order(v)
 	}
 	r := q.Find(&response.Result)
-	fmt.Println("r", response.Pagination, response.Result)
 	return response, r.Error
 }
