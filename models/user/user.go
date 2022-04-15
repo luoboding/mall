@@ -19,13 +19,13 @@ const (
 
 type User struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
-	Nickname  sql.NullString `json:"nickname"`
-	Username  string         `json:"username" gorm:"index"`
-	Password  string         `json:"password" gorm:"index"`
-	Phone     string         `json:"phone" gorm:"index"`
-	Gender    uint8          `json:"gender"`
-	Avatar    sql.NullString `json:"avatar"`
-	Status    uint           `json:"status" gorm:"index"`
+	Nickname  sql.NullString `json:"nickname" gorm:"comment:昵称"`
+	Username  string         `json:"username" gorm:"index;comment:用户名"`
+	Password  string         `json:"password" gorm:"index;comment:密码"`
+	Phone     string         `json:"phone" gorm:"index;comment:电话号码"`
+	Gender    uint8          `json:"gender" gorm:"index;comment:性别"`
+	Avatar    sql.NullString `json:"avatar" gorm:"comment:头像"`
+	Status    uint           `json:"status" gorm:"index;comment:状态0正常1禁用"`
 	CreatedAt time.Time      `json:"created_at"`
 }
 
@@ -63,7 +63,7 @@ func (user *User) Create() error {
 	user.Encrypt_password()
 	result := db.Create(user)
 	if result.Error != nil {
-		e := errors.New(result.Error.Error())
+		e := errors.New("密码错误")
 		e.Code = http.StatusBadRequest
 		return e
 	}

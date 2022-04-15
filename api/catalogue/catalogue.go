@@ -59,3 +59,22 @@ func Update(c *gin.Context) {
 		"message": "修改成功",
 	})
 }
+
+func One(c *gin.Context) {
+	id := c.Param("id")
+	i, e := strconv.Atoi(id)
+	if e != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+	r, error := catalogue.One(i)
+	if error != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": e.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, r)
+}

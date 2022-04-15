@@ -14,6 +14,7 @@ const (
 type UserAuthorization struct {
 	Id   uint64
 	Kind user.UserKind
+	Name string
 }
 
 type UserClaims struct {
@@ -39,6 +40,7 @@ func New(id uint64, kind user.UserKind) (string, error) {
 	user := UserAuthorization{
 		Id:   id,
 		Kind: kind,
+		Name: "张三",
 	}
 	return user.Create_JWT()
 }

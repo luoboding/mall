@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/luoboding/mall/api/authentication"
 	"github.com/luoboding/mall/api/catalogue"
+	"github.com/luoboding/mall/api/file"
 	"github.com/luoboding/mall/api/product"
 	"github.com/luoboding/mall/api/user"
 	"github.com/luoboding/mall/middleware/authorization"
@@ -41,6 +42,12 @@ func main() {
 	catalogue_group.Use(authorization.Auth)
 	catalogue_group.POST("", catalogue.Create)
 	catalogue_group.PATCH("/:id", catalogue.Update)
+	catalogue_group.GET("/:id", catalogue.One)
+
+	file_group := r.Group("/file")
+	file_group.Use(authorization.Auth)
+	file_group.POST("", file.Create)
+
 	// 获取环境变量
 	port := utils.If(os.Getenv("PORT") != "", os.Getenv("PORT"), "3000")
 	r.Run(fmt.Sprintf(":%s", port))

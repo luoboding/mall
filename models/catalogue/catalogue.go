@@ -2,6 +2,7 @@ package catalogue
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/luoboding/mall/db"
@@ -9,14 +10,15 @@ import (
 
 type Catalogue struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
-	Title     string    `json:"title"`               // 分类标题
-	Thumbnail string    `json:"thumbnail"`           // 分类图标 参考美团外卖
-	Sort      uint8     `json:"sort"`                // 顺序
-	Status    uint      `json:"status" gorm:"index"` // 状态 0 开启 1 禁用
+	Title     string    `json:"title" gorm:"comment:标题"`              // 分类标题
+	Thumbnail string    `json:"thumbnail" gorm:"comment:缩略图"`         // 分类图标 参考美团外卖
+	Sort      uint8     `json:"sort" gorm:"index;comment:排序"`         // 顺序
+	Status    uint      `json:"status" gorm:"index;comment:状态0正常1禁用"` // 状态 0 开启 1 禁用
 	CreatedAt time.Time `json:"created_at"`
 }
 
 func (c *Catalogue) validate() bool {
+	fmt.Println("c", c.Title, c.Thumbnail)
 	return c.Title != "" && c.Thumbnail != ""
 }
 
@@ -28,7 +30,7 @@ func (c *Catalogue) doseNameExist() bool {
 }
 
 func (c *Catalogue) Create() error {
-	if c.validate() {
+	if !c.validate() {
 		return errors.New("参数错误")
 	}
 	if c.doseNameExist() {
