@@ -15,10 +15,6 @@ import (
 	"github.com/luoboding/mall/utils"
 )
 
-type Test struct {
-	Name string `example:"title"`
-}
-
 func main() {
 	// 运行migration
 	migrations.Migrate()
@@ -31,18 +27,28 @@ func main() {
 	r.POST("/user", user.Signup)
 	r.POST("/authentication", authentication.Signin)
 
+	user_group := r.Group("/user")
+	user_group.Use(authorization.Auth)
+	{
+		user_group.PATCH("/:id", user.Update)
+	}
+
 	product_group := r.Group("/product")
-	product_group.Use(authorization.Auth)
-	product_group.POST("", product.Create)
-	product_group.GET("", product.List)
-	product_group.GET("/:id", product.One)
-	product_group.PATCH("/:id", product.Update)
+	{
+		product_group.Use(authorization.Auth)
+		product_group.POST("", product.Create)
+		product_group.GET("", product.List)
+		product_group.GET("/:id", product.One)
+		product_group.PATCH("/:id", product.Update)
+	}
 
 	catalogue_group := r.Group("/catalogue")
-	catalogue_group.Use(authorization.Auth)
-	catalogue_group.POST("", catalogue.Create)
-	catalogue_group.PATCH("/:id", catalogue.Update)
-	catalogue_group.GET("/:id", catalogue.One)
+	{
+		catalogue_group.Use(authorization.Auth)
+		catalogue_group.POST("", catalogue.Create)
+		catalogue_group.PATCH("/:id", catalogue.Update)
+		catalogue_group.GET("/:id", catalogue.One)
+	}
 
 	file_group := r.Group("/file")
 	file_group.Use(authorization.Auth)
